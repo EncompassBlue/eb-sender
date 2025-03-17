@@ -1,0 +1,43 @@
+name: EB Email Sender Microservice
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - uses: actions/checkout@v3
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.REGION }}
+      - name: Install CDK
+        run: npm install -g aws-cdk
+      - name: Install dependencies
+        run: npm install
+      - name: Deploy to AWS
+        run: cdk deploy --require-approval=never
+        env:
+          STACK_NAME: blueiot
+          FRONTEND_REPO_NAME: ebmii-frontend
+          ENV: ${{ secrets.ENV }}
+          REGION: ${{ secrets.REGION }}
+          ACCOUNT_NUMBER: ${{ secrets.ACCOUNT_NUMBER }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+          DOMAIN_IDENTITY: ${{ secrets.DOMAIN_IDENTITY }}
+          API_KEY: ${{ secrets.API_KEY }}
